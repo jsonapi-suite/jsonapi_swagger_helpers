@@ -54,7 +54,7 @@ module JsonapiSwaggerHelpers
 
   def jsonapi_filters(controller)
     filter_names = []
-    controller._jsonapi_compliable._filters.each_pair do |name, opts|
+    controller._jsonapi_compliable.filters.each_pair do |name, opts|
       filter_names << name
     end
 
@@ -102,7 +102,7 @@ module JsonapiSwaggerHelpers
   end
 
   def jsonapi_includes(controller, action)
-    includes = controller._jsonapi_compliable._includes[:whitelist]
+    includes = controller._jsonapi_compliable.sideloads[:whitelist]
 
     if includes
       directive = includes[action]
