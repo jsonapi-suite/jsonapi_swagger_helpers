@@ -104,7 +104,7 @@ module JsonapiSwaggerHelpers
   def jsonapi_includes(controller, action)
     includes = controller._jsonapi_compliable.sideloads[:whitelist]
 
-    if includes
+    if includes && includes[action]
       directive = includes[action]
       includes  = directive.to_string
 
