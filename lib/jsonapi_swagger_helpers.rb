@@ -106,14 +106,14 @@ module JsonapiSwaggerHelpers
 
     if includes && includes[action]
       directive = includes[action]
-      includes  = directive.to_string
+      includes  = directive.to_string.split(",").sort.join(",<br/>")
 
       parameter do
         key :name, :include
         key :in, :query
         key :type, :string
         key :required, false
-        key :description, "<a href='http://jsonapi.org/format/#fetching-includes'>JSONAPI includes</a>: \"#{includes}\""
+        key :description, "<a href='http://jsonapi.org/format/#fetching-includes'>JSONAPI includes</a>: #{includes}"
       end
     end
   end
