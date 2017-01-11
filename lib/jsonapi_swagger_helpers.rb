@@ -113,7 +113,7 @@ module JsonapiSwaggerHelpers
         key :in, :query
         key :type, :string
         key :required, false
-        key :description, "<a href='http://jsonapi.org/format/#fetching-includes'>JSONAPI includes</a>: #{includes}"
+        key :description, "<a href='http://jsonapi.org/format/#fetching-includes'>JSONAPI includes</a>: <br/> #{includes}"
       end
     end
   end
