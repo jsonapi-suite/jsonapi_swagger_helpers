@@ -33,6 +33,7 @@ module JsonapiSwaggerHelpers
   def jsonapi_index(controller)
     jsonapi_includes(controller, :index)
     jsonapi_filters(controller)
+    jsonapi_stats(controller)
     jsonapi_pagination
     jsonapi_sorting
   end
@@ -65,6 +66,24 @@ module JsonapiSwaggerHelpers
         key :type, :string
         key :required, false
         key :description, "<a href='http://jsonapi.org/format/#fetching-filtering'>JSONAPI filter</a>"
+
+        items do
+          key :model, :string
+        end
+      end
+    end
+  end
+
+  def jsonapi_stats(controller)
+    controller._jsonapi_compliable.stats.each_pair do |stat_name, opts|
+      calculations = opts.calculations.keys - [:keys]
+      calculations = calculations.join('<br/>')
+      parameter do
+        key :name, "stats[#{stat_name}]"
+        key :in, :query
+        key :type, :string
+        key :required, false
+        key :description, "<a href='http://jsonapi.org/format/#document-meta'>JSONAPI meta data</a><br/> #{calculations}"
 
         items do
           key :model, :string
