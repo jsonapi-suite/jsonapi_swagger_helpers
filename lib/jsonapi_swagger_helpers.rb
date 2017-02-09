@@ -32,7 +32,7 @@ module JsonapiSwaggerHelpers
 
   def jsonapi_index(controller)
     jsonapi_includes(controller, :index)
-    jsonapi_filters(controller)
+    jsonapi_filters(controller, :index)
     jsonapi_stats(controller)
     jsonapi_pagination
     jsonapi_sorting
@@ -53,29 +53,53 @@ module JsonapiSwaggerHelpers
     end
   end
 
-  def jsonapi_filters(controller)
-    filter_names = []
-    controller._jsonapi_compliable.filters.each_pair do |name, opts|
-      filter_names << name
+  private
+
+  def all_resources(resource, include_directive, memo = {})
+    resource.sideloading.sideloads.each_pair do |name, sideload|
+      next if memo[name] || !include_directive.key?(name)
+
+      memo[name] = sideload.resource.class
+      all_resources(sideload.resource.class, include_directive[name], memo)
+    end
+    memo
+  end
+
+  def jsonapi_filters(controller, action_name)
+    filters = {}
+    resource_class = controller._jsonapi_compliable
+    directive = includes_for_action(controller, action_name)
+    resources = all_resources(resource_class, directive)
+    resources[:base] = resource_class
+
+    resources.each_pair do |name, klass|
+      klass.config[:filters].each_pair do |filter_name, opts|
+        filters[name] ||= []
+        filters[name] << filter_name
+      end
     end
 
-    filter_names.each do |filter_name|
-      parameter do
-        key :name, "filter[#{filter_name}]"
-        key :in, :query
-        key :type, :string
-        key :required, false
-        key :description, "<a href='http://jsonapi.org/format/#fetching-filtering'>JSONAPI filter</a>"
+    filters.each_pair do |association_name, filter_names|
+      filter_names.each do |name|
+        filter_name = association_name == :base ? "filter[#{name}]" : "filter[#{association_name}][#{name}]"
 
-        items do
-          key :model, :string
+        parameter do
+          key :name, filter_name
+          key :in, :query
+          key :type, :string
+          key :required, false
+          key :description, "<a href='http://jsonapi.org/format/#fetching-filtering'>JSONAPI filter</a>"
+
+          items do
+            key :model, :string
+          end
         end
       end
     end
   end
 
   def jsonapi_stats(controller)
-    controller._jsonapi_compliable.stats.each_pair do |stat_name, opts|
+    controller._jsonapi_compliable.config[:stats].each_pair do |stat_name, opts|
       calculations = opts.calculations.keys - [:keys]
       calculations = calculations.join('<br/>')
       parameter do
@@ -120,12 +144,21 @@ module JsonapiSwaggerHelpers
     end
   end
 
-  def jsonapi_includes(controller, action)
-    includes = controller._jsonapi_compliable.sideloads[:whitelist]
+  def includes_for_action(controller, action)
+    resource_class = controller._jsonapi_compliable
+    includes       = resource_class.sideloading.to_hash[:base]
+    whitelist      = resource_class.config[:sideload_whitelist]
 
-    if includes && includes[action]
-      directive = includes[action]
-      includes  = directive.to_string.split(",").sort.join(",<br/>")
+    if whitelist && whitelist[action]
+      includes = JsonapiCompliable::Util::IncludeParams.scrub(includes, whitelist[action])
+    end
+
+    JSONAPI::IncludeDirective.new(includes)
+  end
+
+  def jsonapi_includes(controller, action)
+    if directive = includes_for_action(controller, action)
+      includes = directive.to_string.split(",").sort.join(",<br/>")
 
       parameter do
         key :name, :include
