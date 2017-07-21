@@ -2,8 +2,25 @@ module JsonapiSwaggerHelpers
   class Util
     def self.controller_for(path)
       path = path.sub('{id}', '1')
-      route = Rails.application.routes.recognize_path(path)
-      "#{route[:controller]}_controller".classify.constantize
+      route = find_route(path)
+
+      if route
+        "#{route[:controller]}_controller".classify.constantize
+      else
+        Rails.logger.error("JsonapiSwaggerHelpers: No controller found for #{path}!") unless route
+      end
+    end
+
+    def self.find_route(path)
+      route = rails_route(path, 'GET')
+      route ||= rails_route(path, 'POST')
+      route ||= rails_route(path, 'PUT')
+      route ||= rails_route(path, 'DELETE')
+      route
+    end
+
+    def self.rails_route(path, method)
+      Rails.application.routes.recognize_path(path) rescue nil
     end
 
     def self.sideload_label(include_directive)

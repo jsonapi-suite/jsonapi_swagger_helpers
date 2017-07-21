@@ -6,6 +6,22 @@ module JsonapiSwaggerHelpers
                          descriptions: {},
                          only: [],
                          except: [])
+      self.resources << {
+        base_path: base_path,
+        tags: tags,
+        descriptions: descriptions,
+        only: only,
+        except: except
+      }
+    end
+
+    def load_resource(config)
+      base_path = config[:base_path]
+      tags = config[:tags]
+      descriptions = config[:descriptions]
+      only = config[:only]
+      except = config[:only]
+
       actions = [:index, :show, :create, :update, :destroy]
       actions.select! { |a| only.include?(a) } unless only.empty?
       actions.reject! { |a| except.include?(a) } unless except.empty?

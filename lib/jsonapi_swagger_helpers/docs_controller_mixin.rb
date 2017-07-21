@@ -22,10 +22,26 @@ module JsonapiSwaggerHelpers
           JsonapiSwaggerHelpers::PayloadDefinition.new(payload).generate
         end
       end
+
+      def resources
+        @resources ||= []
+      end
+
+      # In production, the controller is loaded before the routes
+      # So, delay looking up the routes until they are loaded
+      def load!
+        resources.each { |r| load_resource(r) }
+        @loaded = true
+      end
+
+      def loaded?
+        !!@loaded
+      end
     end
 
     # Give Swagger::Blocks what it wants
     def index
+      self.class.load! unless self.class.loaded?
       render json: Swagger::Blocks.build_root_json([self.class])
     end
   end
