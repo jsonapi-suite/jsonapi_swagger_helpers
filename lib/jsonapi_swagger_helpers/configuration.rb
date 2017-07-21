@@ -5,7 +5,8 @@ module JsonapiSwaggerHelpers
         string: [String],
         integer: [Integer, Bignum],
         float: [Float],
-        boolean: [TrueClass, FalseClass]
+        boolean: [TrueClass, FalseClass],
+        object: [Hash]
       }
     end
   end
