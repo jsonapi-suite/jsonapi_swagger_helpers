@@ -1,76 +1,58 @@
 module JsonapiSwaggerHelpers
   module ResourceMixin
 
-    def jsonapi_resource(base_path, tags: [], descriptions: {}, only: [], except: [])
-      actions   = [:index, :show, :create, :update, :destroy]
-
-      unless only.empty?
-        actions.select! { |a| only.include?(a) }
-      end
-
-      unless except.empty?
-        actions.reject! { |a| except.include?(a) }
-      end
+    def jsonapi_resource(base_path,
+                         tags: [],
+                         descriptions: {},
+                         only: [],
+                         except: [])
+      actions = [:index, :show, :create, :update, :destroy]
+      actions.select! { |a| only.include?(a) } unless only.empty?
+      actions.reject! { |a| except.include?(a) } unless except.empty?
 
       prefix     = @swagger_root_node.data[:basePath]
       full_path  = [prefix, base_path].join('/').gsub('//', '/')
-      controller = controller_for(full_path)
+      controller = JsonapiSwaggerHelpers::Util.controller_for(full_path)
 
+      ctx = self
       if [:create, :index].any? { |a| actions.include?(a) }
         swagger_path base_path do
-          if actions.include?(:index)
-            operation :get do
-              key :tags, tags
-              key :description, descriptions[:index]
-              jsonapi_index(controller)
-            end
+          if actions.include?(:index) && controller.action_methods.include?('index')
+            index_action = JsonapiSwaggerHelpers::IndexAction.new \
+              self, controller, tags: tags, description: descriptions[:index]
+            index_action.generate
           end
 
-          if actions.include?(:create)
-            operation :post do
-              key :tags, tags
-              key :description, descriptions[:create]
-              strong_resource(controller, :create)
-            end
+          if actions.include?(:create) && controller.action_methods.include?('create')
+            create_action = JsonapiSwaggerHelpers::CreateAction.new \
+              self, controller, tags: tags, description: descriptions[:create]
+            create_action.generate
           end
         end
       end
 
       if [:show, :update, :destroy].any? { |a| actions.include?(a) }
+        ctx = self
         swagger_path "#{base_path}/{id}" do
-          if actions.include?(:show)
-            operation :get do
-              key :tags, tags
-              key :description, descriptions[:show]
-              jsonapi_show(controller)
-            end
+          if actions.include?(:show) && controller.action_methods.include?('show')
+            show_action = JsonapiSwaggerHelpers::ShowAction.new \
+              self, controller, tags: tags, description: descriptions[:show]
+            show_action.generate
           end
 
-          if actions.include?(:update)
-            operation :put do
-              key :tags, tags
-              key :description, descriptions[:update]
-              id_in_url
-              strong_resource(controller, :update)
-            end
+          if actions.include?(:update) && controller.action_methods.include?('update')
+            update_action = JsonapiSwaggerHelpers::UpdateAction.new \
+              self, controller, tags: tags, description: descriptions[:update]
+            update_action.generate
           end
 
-          if actions.include?(:destroy)
-            operation :delete do
-              key :tags, tags
-              key :description, descriptions[:destroy]
-              id_in_url
-            end
+          if actions.include?(:destroy) && controller.action_methods.include?('destroy')
+            destroy_action = JsonapiSwaggerHelpers::DestroyAction.new \
+              self, controller, tags: tags, description: descriptions[:destroy]
+            destroy_action.generate
           end
         end
       end
     end
-
-    def controller_for(path)
-      path = path.sub('{id}', '1')
-      route = Rails.application.routes.recognize_path(path)
-      "#{route[:controller]}_controller".classify.constantize
-    end
-
   end
 end
