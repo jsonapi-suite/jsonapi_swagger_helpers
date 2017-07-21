@@ -1,5 +1,6 @@
 require 'swagger/blocks'
 require "jsonapi_spec_helpers"
+require "jsonapi_swagger_helpers/errors"
 require "jsonapi_swagger_helpers/configuration"
 require "jsonapi_swagger_helpers/payload_definition"
 require "jsonapi_swagger_helpers/util"
