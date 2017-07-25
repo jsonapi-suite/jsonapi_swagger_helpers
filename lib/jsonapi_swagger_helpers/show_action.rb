@@ -37,13 +37,14 @@ module JsonapiSwaggerHelpers
           _self.util.jsonapi_includes(self)
 
           _self.each_association do |association_name, association_resource|
+            _self.util.jsonapi_fields(self, association_resource.config[:type])
+
+            if association_resource.config[:extra_fields].keys.length > 0
+              _self.util.jsonapi_extra_fields(self, association_resource)
+            end
+
             _self.util.each_filter(association_resource, association_name) do |filter_label|
               _self.util.jsonapi_filter(self, filter_label)
-              _self.util.jsonapi_fields(self, association_resource.config[:type])
-
-              if association_resource.config[:extra_fields].keys.length > 0
-                _self.util.jsonapi_extra_fields(self, association_resource)
-              end
             end
           end
         end

@@ -11,9 +11,10 @@ require "jsonapi_swagger_helpers/show_action"
 require "jsonapi_swagger_helpers/create_action"
 require "jsonapi_swagger_helpers/update_action"
 require "jsonapi_swagger_helpers/destroy_action"
-
 require "jsonapi_swagger_helpers/resource_mixin"
 require "jsonapi_swagger_helpers/docs_controller_mixin"
+
+require "jsonapi_swagger_helpers/railtie" if defined?(Rails)
 
 module JsonapiSwaggerHelpers
   def self.configure

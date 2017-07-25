@@ -68,8 +68,12 @@ module JsonapiSwaggerHelpers
     end
 
     def each_association
+      types = [jsonapi_type]
       resource_map = util.all_resources(resource, include_directive)
       resource_map.each_pair do |association_name, association_resource|
+        resource_type = association_resource.config[:type]
+        next if types.include?(resource_type)
+        types << resource_type
         yield association_name, association_resource
       end
     end
