@@ -1,4 +1,5 @@
 require 'pp'
+require 'net/http'
 begin
   require 'swagger/diff'
 rescue LoadError
@@ -6,38 +7,43 @@ rescue LoadError
   exit(1)
 end
 
-def get_swagger(path)
-  token = ENV['JSONAPI_TOKEN']
+def get_local_swagger(path)
   session = ActionDispatch::Integration::Session.new(Rails.application)
-  session.get path, headers: {
-    'Authorization' => "Token token=\"#{token}\""
-  }
+  session.get path
   session.response.body
+end
+
+def get_remote_swagger(path)
+  uri = URI(path)
+  http = Net::HTTP.new(uri.host, uri.port)
+  req = Net::HTTP::Get.new(uri)
+  req['Authorization'] = "Token token=\"#{ENV['JSONAPI_TOKEN']}\""
+  res = http.request(req)
+  res.body
 end
 
 desc <<-DESC
 Compare a local swagger.json to a remote swagger.json
 
-Usage: swagger_diff[namespace,local_host,remote_host]
+Usage: swagger_diff[namespace,remote_host]
 
-Example swagger_diff["api","http://localhost:3000","http://myapp.com"]
+Example swagger_diff["api","http://myapp.com"]
 
 If your app relies on JSON Web Tokens, you can set JSONAPI_TOKEN for authentication
 DESC
-task :swagger_diff, [:namespace, :local_host, :remote_host] => [:environment] do |_, args|
-  local_host  = args[:local_host]  || 'http://localhost:3000'
-  remote_host = args[:remote_host] || 'http://localhost:3000'
+task :swagger_diff, [:namespace, :remote_host] => [:environment] do |_, args|
+  remote_host = args[:remote_host] || 'http://localhost:3001'
   namespace   = args[:namespace]   || 'api'
 
-  old  = get_swagger("#{remote_host}/#{namespace}/swagger.json")
-  new  = get_swagger("#{local_host}/#{namespace}/swagger.json")
+  old  = get_remote_swagger("#{remote_host}/#{namespace}/swagger.json")
+  new  = get_local_swagger("/#{namespace}/swagger.json")
   diff = Swagger::Diff::Diff.new(old, new)
 
   if diff.compatible?
     puts 'No backwards incompatibilities found!'
   else
     puts "Found backwards incompatibilities!\n\n"
-    pp JSON.parse(diff.incompatibilities)
+    pp diff.incompatibilities.inspect
     exit(1)
   end
 end
