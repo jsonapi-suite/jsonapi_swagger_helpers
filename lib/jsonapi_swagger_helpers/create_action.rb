@@ -20,8 +20,12 @@ module JsonapiSwaggerHelpers
           key :in, :body
 
           schema do
-            key :'$ref', :"#{_self.strong_resource.name}_create"
+            key :'$ref', _self.request_schema_id
           end
+        end
+
+        response 200 do
+          key :description, 'API Response'
         end
       end
     end

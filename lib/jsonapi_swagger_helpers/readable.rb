@@ -78,6 +78,23 @@ module JsonapiSwaggerHelpers
       resource.config[:type]
     end
 
+    def response_schema_id
+      "#{operation_id}_#{action_name}_response"
+    end
+
+    def generate_response_schema!
+      _self = self
+
+      payloads = util.payloads_for(resource, include_directive.to_hash)
+      JsonapiSwaggerHelpers.docs_controller.send(:swagger_schema, response_schema_id) do
+        payloads.each do |p|
+          property p.name do
+            key :'$ref', p.name
+          end
+        end
+      end
+    end
+
     def generate
       raise 'override me'
     end

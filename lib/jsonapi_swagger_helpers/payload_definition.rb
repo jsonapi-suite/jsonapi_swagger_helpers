@@ -50,7 +50,10 @@ module JsonapiSwaggerHelpers
           property attribute do
             type = _self.class.swagger_type_for(payload.name, attribute, config[:type])
             key :type, type
-            key :description, config[:description]
+
+            if config[:description]
+              key :description, config[:description]
+            end
           end
         end
       end

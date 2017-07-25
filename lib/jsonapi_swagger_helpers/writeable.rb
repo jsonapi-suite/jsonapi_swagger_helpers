@@ -56,21 +56,53 @@ module JsonapiSwaggerHelpers
       controller._strong_resources[action_name]
     end
 
+    def request_schema_id
+      "#{operation_id}_#{action_name}_request"
+    end
+
+    def generate_request_schema!
+      _self = self
+
+      JsonapiSwaggerHelpers.docs_controller.send(:swagger_schema, request_schema_id) do
+        property _self.strong_resource.name do
+          key :'$ref', :"#{_self.strong_resource.name}_#{_self.action_name}"
+        end
+
+        _self.each_strong_relation(_self.strong_resource) do |relation_name, relation_config|
+          property relation_name do
+            key :'$ref', :"#{_self.strong_resource.name}_#{relation_name}_#{_self.action_name}"
+          end
+        end
+      end
+    end
+
+    def each_strong_relation(strong_resource)
+      strong_resource.relations.each_pair do |relation_name, relation_config|
+        yield relation_name, relation_config
+
+        each_strong_relation(relation_config[:resource]) do |sub_relation_name, sub_relation_config|
+          yield sub_relation_name, sub_relation_config
+        end
+      end
+    end
+
     def define_schema
+      generate_request_schema!
+
       _self = self
       context.send(:swagger_schema, :"#{strong_resource.name}_#{action_name}") do
         _self.strong_resource.attributes.each_pair do |attribute, config|
           property attribute do
-            key :type, config[:type] # TODO - swagger type?
+            key :type, config[:type]
           end
         end
       end
 
-      _self.strong_resource.relations.each_pair do |relation_name, relation_config|
+      _self.each_strong_relation(_self.strong_resource) do |relation_name, relation_config|
         context.send(:swagger_schema, :"#{strong_resource.name}_#{relation_name}_#{action_name}") do
           relation_config[:resource].attributes.each_pair do |attribute, config|
             property attribute do
-              key :type, config[:type] # TODO - swagger type?
+              key :type, config[:type]
             end
           end
         end
@@ -78,14 +110,7 @@ module JsonapiSwaggerHelpers
     end
 
     def generate
-      _self = self
-
-      define_schema
-      @node.operation :post do
-        key :description, _self.description
-        key :operationId, _self.operation_id
-        key :tags, _self.all_tags
-      end
+      raise 'override me'
     end
   end
 end

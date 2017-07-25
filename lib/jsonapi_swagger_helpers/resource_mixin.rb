@@ -20,7 +20,7 @@ module JsonapiSwaggerHelpers
       tags = config[:tags]
       descriptions = config[:descriptions]
       only = config[:only]
-      except = config[:only]
+      except = config[:except]
 
       actions = [:index, :show, :create, :update, :destroy]
       actions.select! { |a| only.include?(a) } unless only.empty?

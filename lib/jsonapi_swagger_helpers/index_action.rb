@@ -8,11 +8,19 @@ module JsonapiSwaggerHelpers
 
     def generate
       _self = self
+      generate_response_schema!
 
       @node.operation :get do
         key :description, _self.full_description
         key :operationId, _self.operation_id
         key :tags, _self.all_tags
+
+        response 200 do
+          key :description, 'API Response'
+          schema do
+            key :'$ref', _self.response_schema_id
+          end
+        end
 
         _self.util.jsonapi_sorting(self)
         _self.util.jsonapi_pagination(self)
