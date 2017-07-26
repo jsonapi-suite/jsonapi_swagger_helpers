@@ -20,7 +20,7 @@ module JsonapiSwaggerHelpers
     end
 
     def self.rails_route(path, method)
-      Rails.application.routes.recognize_path(path) rescue nil
+      Rails.application.routes.recognize_path(path, method: method) rescue nil
     end
 
     def self.sideload_label(include_directive)
