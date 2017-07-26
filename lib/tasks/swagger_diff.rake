@@ -16,6 +16,7 @@ end
 def get_remote_swagger(path)
   uri = URI(path)
   http = Net::HTTP.new(uri.host, uri.port)
+  http.use_ssl = true if uri.scheme == 'https'
   req = Net::HTTP::Get.new(uri)
   req['Authorization'] = "Token token=\"#{ENV['JSONAPI_TOKEN']}\""
   res = http.request(req)
