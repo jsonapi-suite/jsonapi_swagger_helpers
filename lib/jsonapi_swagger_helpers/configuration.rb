@@ -4,7 +4,7 @@ module JsonapiSwaggerHelpers
       @type_mapping ||= {
         string: [String],
         integer: [Integer, Bignum],
-        float: [Float],
+        number: [Float],
         boolean: [TrueClass, FalseClass],
         object: [Hash]
       }
