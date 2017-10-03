@@ -54,10 +54,24 @@ module JsonapiSwaggerHelpers
       memo
     end
 
+    def self.sideload_hash(sideload, processed = [])
+      if processed.select { |p| p == sideload.name }.length == 1
+        return { sideload.name => {} }
+      end
+      processed << sideload.name
+
+      { sideload.name => {} }.tap do |hash|
+        sideload.all_sideloads.each_pair do |key, sl|
+          hash[sideload.name][key] = sideload_hash(sl, processed)[key] || {}
+        end
+      end
+    end
+
     def self.include_directive_for(controller, action)
       resource_class = controller._jsonapi_compliable
-      includes       = resource_class.sideloading.to_hash[:base]
-      whitelist      = resource_class.config[:sideload_whitelist]
+
+      includes       = sideload_hash(resource_class.sideloading)[:base]
+      whitelist      = controller._sideload_whitelist
 
       if whitelist && whitelist[action]
         includes = JsonapiCompliable::Util::IncludeParams
@@ -72,7 +86,7 @@ module JsonapiSwaggerHelpers
         payloads << JsonapiSpecHelpers::Payload.by_type(resource.config[:type])
 
         include_hash.each_pair do |name, nested|
-          sideload = resource.sideloading.sideloads[name]
+          sideload = resource.sideloading.all_sideloads[name]
 
           if sideload.polymorphic?
             sideload.polymorphic_groups.each_pair do |type, sl|
