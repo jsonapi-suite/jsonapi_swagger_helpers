@@ -1,11 +1,5 @@
 require 'pp'
 require 'net/http'
-begin
-  require 'swagger/diff'
-rescue LoadError
-  puts "You must install the swagger-diff gem to use the swagger_diff rake task"
-  exit(1)
-end
 
 def get_local_swagger(path)
   session = ActionDispatch::Integration::Session.new(Rails.application)
@@ -33,6 +27,12 @@ Example swagger_diff["api","http://myapp.com"]
 If your app relies on JSON Web Tokens, you can set JSONAPI_TOKEN for authentication
 DESC
 task :swagger_diff, [:namespace, :remote_host] => [:environment] do |_, args|
+  begin
+    require 'swagger/diff'
+  rescue LoadError
+    raise 'You must install the swagger-diff gem to use the swagger_diff rake task'
+  end
+
   remote_host = args[:remote_host] || 'http://localhost:3001'
   namespace   = args[:namespace]   || 'api'
 
