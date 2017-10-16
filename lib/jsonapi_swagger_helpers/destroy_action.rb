@@ -15,6 +15,10 @@ module JsonapiSwaggerHelpers
         key :tags, _self.tags
 
         _self.util.id_in_url(self)
+
+        response 200 do
+          key :description, 'API Response'
+        end
       end
     end
   end
