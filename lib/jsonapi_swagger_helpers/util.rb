@@ -7,7 +7,7 @@ module JsonapiSwaggerHelpers
       if route
         "#{route[:controller]}_controller".classify.constantize
       else
-        Rails.logger.error("JsonapiSwaggerHelpers: No controller found for #{path}!") unless route
+        raise ArgumentError.new("JsonapiSwaggerHelpers: No controller found for #{path}!")
       end
     end
 
