@@ -12,7 +12,7 @@ Could not find type mapping for payload "#{@payload_name}", key "#{@attribute}".
 
 To add a custom mapping:
 
-JsonapiSwaggerHelpers.config do |c|
+JsonapiSwaggerHelpers.configure do |c|
   c.type_mapping[:string] << MyCustomType
 end
         STR
