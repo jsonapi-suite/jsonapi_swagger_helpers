@@ -22,8 +22,11 @@ Gem::Specification.new do |spec|
   # TODO: above 0.4.2
   spec.add_dependency 'jsonapi_spec_helpers', ['< 1']
   spec.add_dependency 'jsonapi_compliable', ['~> 0.10']
+  spec.add_runtime_dependency 'strong_resources', '>= 0'
 
+  spec.add_development_dependency "activesupport", ">= 4.1"
   spec.add_development_dependency "bundler", "~> 1.12"
+  spec.add_development_dependency "byebug", ">= 0"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec", "~> 3.0"
 end
