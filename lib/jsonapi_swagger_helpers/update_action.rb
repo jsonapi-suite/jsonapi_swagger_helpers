@@ -15,7 +15,7 @@ module JsonapiSwaggerHelpers
         key :operationId, _self.operation_id
         key :tags, _self.all_tags
 
-        _self.util.id_in_url(self)
+        _self.util.id_in_url(self) unless _self.singular
 
         parameter do
           key :name, :payload

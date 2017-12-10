@@ -14,7 +14,7 @@ module JsonapiSwaggerHelpers
         key :operationId, _self.operation_id
         key :tags, _self.tags
 
-        _self.util.id_in_url(self)
+        _self.util.id_in_url(self) unless _self.singular
 
         response 200 do
           key :description, 'API Response'
