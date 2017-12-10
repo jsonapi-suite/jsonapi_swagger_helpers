@@ -13,8 +13,7 @@ module JsonapiSwaggerHelpers
       end
     end
 
-    def initialize(node, controller, description: nil, tags: [],
-                   singular: false)
+    def initialize(node, controller, description: nil, tags: [], singular: false)
       @node = node
       @controller = controller
       @resource = controller._jsonapi_compliable

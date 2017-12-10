@@ -44,8 +44,7 @@ module JsonapiSwaggerHelpers
           action_class_name = "#{action.to_s.camelize}Action"
           action_class = JsonapiSwaggerHelpers.const_get(action_class_name)
           action_object = action_class.new \
-            self, controller, tags: tags, description: descriptions[action],
-                              singular: singular
+            self, controller, tags: tags, description: descriptions[action], singular: singular
           action_object.generate
         end
       end
