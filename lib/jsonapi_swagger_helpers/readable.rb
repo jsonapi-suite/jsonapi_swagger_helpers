@@ -1,21 +1,25 @@
+# frozen_string_literal: true
+
 module JsonapiSwaggerHelpers
   module Readable
     def self.included(klass)
       klass.class_eval do
         attr_reader :node,
-          :controller,
-          :resource,
-          :description,
-          :tags
+                    :controller,
+                    :resource,
+                    :description,
+                    :tags,
+                    :singular
       end
     end
 
-    def initialize(node, controller, description: nil, tags: [])
+    def initialize(node, controller, description: nil, tags: [], singular: false)
       @node = node
       @controller = controller
       @resource = controller._jsonapi_compliable
       @description = description || default_description
       @tags = tags
+      @singular = singular
     end
 
     def default_description

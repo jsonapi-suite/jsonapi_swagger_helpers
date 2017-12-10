@@ -1,21 +1,25 @@
+# frozen_string_literal: true
+
 module JsonapiSwaggerHelpers
   module Writeable
     def self.included(klass)
       klass.class_eval do
         attr_reader :node,
-          :controller,
-          :resource,
-          :description,
-          :tags
+                    :controller,
+                    :resource,
+                    :description,
+                    :tags,
+                    :singular
       end
     end
 
-    def initialize(node, controller, description: nil, tags: [])
+    def initialize(node, controller, description: nil, tags: [], singular: false)
       @node = node
       @controller = controller
       @resource = controller._jsonapi_compliable
       @description = description || default_description
       @tags = tags
+      @singular = singular
     end
 
     def util
@@ -41,7 +45,7 @@ module JsonapiSwaggerHelpers
     def payload_tags
       tags = [:"payload-#{strong_resource.name}_#{action_name}"]
 
-      strong_resource.relations.each_pair do |relation_name, relation_config|
+      strong_resource.relations.each_pair do |relation_name, _relation_config|
         tags << :"payload-#{strong_resource.name}_#{relation_name}_#{action_name}"
       end
 
@@ -68,7 +72,7 @@ module JsonapiSwaggerHelpers
           key :'$ref', :"#{_self.strong_resource.name}_#{_self.action_name}"
         end
 
-        _self.each_strong_relation(_self.strong_resource) do |relation_name, relation_config|
+        _self.each_strong_relation(_self.strong_resource) do |relation_name, _relation_config|
           property relation_name do
             key :'$ref', :"#{_self.strong_resource.name}_#{relation_name}_#{_self.action_name}"
           end

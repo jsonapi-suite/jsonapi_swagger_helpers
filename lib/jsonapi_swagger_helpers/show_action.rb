@@ -22,7 +22,7 @@ module JsonapiSwaggerHelpers
           end
         end
 
-        _self.util.id_in_url(self)
+        _self.util.id_in_url(self) unless _self.singular
         _self.util.jsonapi_fields(self, _self.jsonapi_type)
 
         if _self.has_extra_fields?

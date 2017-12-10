@@ -5,13 +5,15 @@ module JsonapiSwaggerHelpers
                          tags: [],
                          descriptions: {},
                          only: [],
-                         except: [])
+                         except: [],
+                         singular: false)
       self.resources << {
         base_path: base_path,
         tags: tags,
         descriptions: descriptions,
         only: only,
-        except: except
+        except: except,
+        singular: singular
       }
     end
 
@@ -21,6 +23,7 @@ module JsonapiSwaggerHelpers
       descriptions = config[:descriptions]
       only = config[:only]
       except = config[:except]
+      singular = config[:singular]
 
       actions = %i[index show create update destroy]
       actions.select! { |a| only.include?(a) } unless only.empty?
@@ -32,7 +35,7 @@ module JsonapiSwaggerHelpers
 
       actions.each do |action|
         next unless controller.action_methods.include?(action.to_s)
-        path = if %i[show update destroy].include?(action)
+        path = if !singular && %i[show update destroy].include?(action)
                  "#{base_path}/{id}"
                else
                  base_path
@@ -41,7 +44,7 @@ module JsonapiSwaggerHelpers
           action_class_name = "#{action.to_s.camelize}Action"
           action_class = JsonapiSwaggerHelpers.const_get(action_class_name)
           action_object = action_class.new \
-            self, controller, tags: tags, description: descriptions[action]
+            self, controller, tags: tags, description: descriptions[action], singular: singular
           action_object.generate
         end
       end
