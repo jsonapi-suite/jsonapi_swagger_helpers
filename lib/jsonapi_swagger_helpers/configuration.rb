@@ -6,7 +6,8 @@ module JsonapiSwaggerHelpers
         integer: [Integer, Bignum],
         number: [Float],
         boolean: [TrueClass, FalseClass],
-        object: [Hash]
+        object: [Hash],
+        array: [Array]
       }
     end
   end
