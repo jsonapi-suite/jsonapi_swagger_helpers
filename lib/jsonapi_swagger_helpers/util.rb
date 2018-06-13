@@ -71,6 +71,7 @@ module JsonapiSwaggerHelpers
 
     def self.include_directive_for(controller, action)
       resource_class = controller._jsonapi_compliable
+      resource_class = resource_class[action] if resource_class.is_a?(Hash)
 
       includes       = sideload_hash(resource_class.sideloading)[:base]
       whitelist      = controller._sideload_whitelist

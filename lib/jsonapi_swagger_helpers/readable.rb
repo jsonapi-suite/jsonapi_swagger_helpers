@@ -6,7 +6,6 @@ module JsonapiSwaggerHelpers
       klass.class_eval do
         attr_reader :node,
                     :controller,
-                    :resource,
                     :description,
                     :tags,
                     :singular
@@ -16,10 +15,17 @@ module JsonapiSwaggerHelpers
     def initialize(node, controller, description: nil, tags: [], singular: false)
       @node = node
       @controller = controller
-      @resource = controller._jsonapi_compliable
       @description = description || default_description
       @tags = tags
       @singular = singular
+    end
+
+    def resource
+      @resource = controller._jsonapi_compliable
+      if @resource.is_a?(Hash)
+        @resource = @resource[action_name]
+      end
+      @resource
     end
 
     def default_description
