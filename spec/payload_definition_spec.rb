@@ -17,7 +17,7 @@ RSpec.describe JsonapiSwaggerHelpers::PayloadDefinition do
     context 'when the payload key has multiple types' do
       it 'returns the first matching type' do
         mapped = described_class
-          .swagger_type_for(:foo, 'myattr', [Bignum, Float])
+          .swagger_type_for(:foo, 'myattr', [Integer, Float])
         expect(mapped).to eq(:integer)
       end
     end

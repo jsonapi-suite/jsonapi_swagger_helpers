@@ -3,7 +3,7 @@ module JsonapiSwaggerHelpers
     def type_mapping
       @type_mapping ||= {
         string: [String],
-        integer: [Integer, Bignum],
+        integer: [Integer],
         number: [Float],
         boolean: [TrueClass, FalseClass],
         object: [Hash],
